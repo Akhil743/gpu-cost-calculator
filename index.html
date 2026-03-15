@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU Cost Economics Calculator | AI Model Training & Inference Cost Estimator</title>
+    <meta name="description" content="Calculate GPU costs for AI model training and inference. Get accurate estimates for text, image, and video models with real-time pricing from major cloud providers.">
+    <meta name="keywords" content="GPU cost calculator, AI model training, inference costs, machine learning economics, cloud computing costs">
+    <meta name="author" content="Akhil S">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="GPU Cost Economics Calculator">
+    <meta property="og:description" content="Interactive calculator for AI model training and inference costs">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://akhil743.github.io/gpu-cost-calculator">
+    <meta property="og:image" content="./assets/calculator-preview.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-microchip"></i>
+                    <h1>GPU Cost Calculator</h1>
+                </div>
+                <nav class="nav">
+                    <a href="#calculator" class="nav-link active">Calculator</a>
+                    <a href="#comparison" class="nav-link">Compare</a>
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="https://akhilrajs.com" class="nav-link" target="_blank">Portfolio</a>
+                </nav>
+                <div class="theme-toggle">
+                    <button id="themeToggle" class="theme-btn">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2>AI Model Cost Estimation Made Simple</h2>
+                <p>Calculate GPU costs and hardware requirements for training and inference across text, image, and video models. Get instant estimates based on real cloud provider pricing.</p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">3</span>
+                        <span class="stat-label">Model Types</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">5+</span>
+                        <span class="stat-label">GPU Options</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">3</span>
+                        <span class="stat-label">Cloud Providers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Calculator Section -->
+    <section id="calculator" class="calculator-section">
+        <div class="container">
+            <div class="calculator-layout">
+                <!-- Input Panel -->
+                <div class="input-panel">
+                    <h3><i class="fas fa-sliders-h"></i> Model Configuration</h3>
+                    
+                    <div class="input-group">
+                        <label for="modelType">
+                            <i class="fas fa-brain"></i>
+                            Model Type
+                        </label>
+                        <select id="modelType">
+                            <option value="text">Text/Language Model (LLM)</option>
+                            <option value="image">Image Generation Model</option>
+                            <option value="video">Video Generation Model</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="parameters">
+                            <i class="fas fa-cog"></i>
+                            Parameters (Billions)
+                        </label>
+                        <input type="number" id="parameters" value="7" min="0.1" max="1000" step="0.1">
+                        <div class="input-help">
+                            <span class="preset-btn" data-value="1.5">1.5B</span>
+                            <span class="preset-btn" data-value="7">7B</span>
+                            <span class="preset-btn" data-value="13">13B</span>
+                            <span class="preset-btn" data-value="30">30B</span>
+                            <span class="preset-btn" data-value="70">70B</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="cloudProvider">
+                            <i class="fas fa-cloud"></i>
+                            Cloud Provider
+                        </label>
+                        <select id="cloudProvider">
+                            <option value="aws">Amazon Web Services (AWS)</option>
+                            <option value="gcp">Google Cloud Platform</option>
+                            <option value="azure">Microsoft Azure</option>
+                        </select>
+                    </div>
+
+                    <div class="usage-section">
+                        <h4><i class="fas fa-chart-line"></i> Usage Patterns</h4>
+                        
+                        <div class="input-group">
+                            <label for="trainingHours">
+                                <i class="fas fa-clock"></i>
+                                Training Duration (Hours)
+                            </label>
+                            <input type="number" id="trainingHours" value="100" min="1" max="10000">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="monthlyInferences">
+                                <i class="fas fa-rocket"></i>
+                                Monthly Inferences
+                            </label>
+                            <input type="number" id="monthlyInferences" value="1000000" min="1000" step="1000">
+                            <div class="input-help">
+                                <span class="preset-btn" data-target="monthlyInferences" data-value="100000">100K</span>
+                                <span class="preset-btn" data-target="monthlyInferences" data-value="1000000">1M</span>
+                                <span class="preset-btn" data-target="monthlyInferences" data-value="10000000">10M</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="concurrentUsers">
+                                <i class="fas fa-users"></i>
+                                Peak Concurrent Users
+                            </label>
+                            <input type="number" id="concurrentUsers" value="100" min="1" max="100000">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Panel -->
+                <div class="results-panel">
+                    <h3><i class="fas fa-calculator"></i> Cost Estimates</h3>
+                    
+                    <!-- Training Costs -->
+                    <div class="cost-section">
+                        <h4><i class="fas fa-graduation-cap"></i> Training Phase</h4>
+                        <div class="cost-cards">
+                            <div class="cost-card">
+                                <div class="cost-icon"><i class="fas fa-dollar-sign"></i></div>
+                                <div class="cost-content">
+                                    <div class="cost-value" id="trainingCost">$12,500</div>
+                                    <div class="cost-label">Total Training Cost</div>
+                                </div>
+                            </div>
+                            <div class="cost-card">
+                                <div class="cost-icon"><i class="fas fa-microchip"></i></div>
+                                <div class="cost-content">
+                                    <div class="cost-value" id="trainingGPU">4x A100</div>
+                                    <div class="cost-label">Recommended GPUs</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inference Costs -->
+                    <div class="cost-section">
+                        <h4><i class="fas fa-rocket"></i> Inference Phase</h4>
+                        <div class="cost-cards">
+                            <div class="cost-card">
+                                <div class="cost-icon"><i class="fas fa-calendar-alt"></i></div>
+                                <div class="cost-content">
+                                    <div class="cost-value" id="monthlyInferenceCost">$3,200</div>
+                                    <div class="cost-label">Monthly Cost</div>
+                                </div>
+                            </div>
+                            <div class="cost-card">
+                                <div class="cost-icon"><i class="fas fa-tachometer-alt"></i></div>
+                                <div class="cost-content">
+                                    <div class="cost-value" id="costPerInference">$0.0032</div>
+                                    <div class="cost-label">Cost per Inference</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hardware Recommendations -->
+                    <div class="hardware-section">
+                        <h4><i class="fas fa-server"></i> Hardware Recommendations</h4>
+                        <div class="hardware-grid" id="hardwareGrid">
+                            <!-- Hardware recommendations will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- ROI Analysis -->
+                    <div class="roi-section">
+                        <h4><i class="fas fa-chart-pie"></i> Cost Breakdown</h4>
+                        <canvas id="costChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section id="comparison" class="comparison-section">
+        <div class="container">
+            <h2><i class="fas fa-balance-scale"></i> Model Comparison</h2>
+            <div class="comparison-table-wrapper">
+                <table class="comparison-table" id="comparisonTable">
+                    <thead>
+                        <tr>
+                            <th>Configuration</th>
+                            <th>Training Cost</th>
+                            <th>Monthly Inference</th>
+                            <th>Recommended GPU</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Comparison rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn-primary" onclick="addCurrentToComparison()">
+                <i class="fas fa-plus"></i> Add Current Configuration
+            </button>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>About This Calculator</h2>
+                    <p>Built by <strong>Akhil S</strong>, an AI Product Manager with experience managing ₹150 Cr+ AI portfolios at scale. This calculator draws from real-world experience in GPU economics and cost optimization across multiple AI product lines.</p>
+                    
+                    <h3>Methodology</h3>
+                    <ul>
+                        <li><strong>Training Costs:</strong> Based on model parameters, GPU requirements, and cloud provider pricing</li>
+                        <li><strong>Inference Costs:</strong> Calculated using throughput estimates and concurrent user patterns</li>
+                        <li><strong>Hardware Selection:</strong> Optimized for memory requirements and compute efficiency</li>
+                        <li><strong>Pricing Data:</strong> Updated regularly from AWS, GCP, and Azure public pricing</li>
+                    </ul>
+
+                    <div class="about-links">
+                        <a href="https://akhilrajs.com" class="btn-secondary" target="_blank">
+                            <i class="fas fa-user"></i> View Portfolio
+                        </a>
+                        <a href="https://github.com/akhil743" class="btn-secondary" target="_blank">
+                            <i class="fab fa-github"></i> GitHub Profile
+                        </a>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <i class="fas fa-bolt"></i>
+                            <span>Real-time Calculations</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Cost Visualization</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Mobile Responsive</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-database"></i>
+                            <span>Updated Pricing</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <p>&copy; 2026 Akhil S. Built with expertise from managing AI portfolios at scale.</p>
+                </div>
+                <div class="footer-right">
+                    <a href="https://akhilrajs.com" target="_blank">Portfolio</a>
+                    <a href="https://linkedin.com/in/akhil-raj-b3531453" target="_blank">LinkedIn</a>
+                    <a href="https://github.com/akhil743" target="_blank">GitHub</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./js/calculator.js"></script>
+    <script src="./js/app.js"></script>
+</body>
+</html>
