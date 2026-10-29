@@ -1,315 +1,375 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPU Cost Economics Calculator | AI Model Training & Inference Cost Estimator</title>
-    <meta name="description" content="Calculate GPU costs for AI model training and inference. Get accurate estimates for text, image, and video models with real-time pricing from major cloud providers.">
-    <meta name="keywords" content="GPU cost calculator, AI model training, inference costs, machine learning economics, cloud computing costs">
+    <title>AI Cost Calculator — token prices, self-hosting break-even, GPU sizing</title>
+    <meta name="description"
+        content="Compare token costs across 16 current LLMs, see when self-hosting an open-weights model beats an API, and size GPUs for serving or training. Prices dated and sourced.">
     <meta name="author" content="Akhil S">
-    
-    <!-- Open Graph Tags -->
-    <meta property="og:title" content="GPU Cost Economics Calculator">
-    <meta property="og:description" content="Interactive calculator for AI model training and inference costs">
+    <meta property="og:title" content="AI Cost Calculator">
+    <meta property="og:description" content="Token costs across 16 LLMs, self-hosting break-even and GPU sizing, with dated, sourced prices.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://akhil743.github.io/gpu-cost-calculator">
-    <meta property="og:image" content="./assets/calculator-preview.png">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
-    
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="./css/style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta property="og:url" content="https://akhil743.github.io/gpu-cost-calculator/">
+    <meta property="og:image" content="https://akhil743.github.io/gpu-cost-calculator/assets/og.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://akhil743.github.io/gpu-cost-calculator/">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    <meta name="theme-color" content="#f6f3ec" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#12110f" media="(prefers-color-scheme: dark)">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=Inter:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-microchip"></i>
-                    <h1>GPU Cost Calculator</h1>
-                </div>
-                <nav class="nav">
-                    <a href="#calculator" class="nav-link active">Calculator</a>
-                    <a href="#comparison" class="nav-link">Compare</a>
-                    <a href="#about" class="nav-link">About</a>
-                    <a href="https://akhilrajs.com" class="nav-link" target="_blank">Portfolio</a>
-                </nav>
-                <div class="theme-toggle">
-                    <button id="themeToggle" class="theme-btn">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                </div>
-            </div>
+    <header class="topbar">
+        <div class="wrap">
+            <a class="brand" href="./">AI Cost Calculator<span>.</span></a>
+            <nav aria-label="Links">
+                <a href="#method" data-tab-link="method" class="hide-sm">Method</a>
+                <a href="https://github.com/Akhil743/gpu-cost-calculator" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://akhilrajs.com" target="_blank" rel="noopener">by Akhil S</a>
+            </nav>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <h2>AI Model Cost Estimation Made Simple</h2>
-                <p>Calculate GPU costs and hardware requirements for training and inference across text, image, and video models. Get instant estimates based on real cloud provider pricing.</p>
-                <div class="hero-stats">
-                    <div class="stat">
-                        <span class="stat-number">3</span>
-                        <span class="stat-label">Model Types</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">5+</span>
-                        <span class="stat-label">GPU Options</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">3</span>
-                        <span class="stat-label">Cloud Providers</span>
-                    </div>
-                </div>
-            </div>
+    <main class="wrap">
+        <section class="hero">
+            <h1>What will your AI feature <em>actually cost?</em></h1>
+            <p>
+                Compare token costs across 16 current models, see when serving an open-weights model on your own GPUs
+                beats paying per token, and size GPUs for serving or training. Every assumption is visible and every
+                price is dated and sourced.
+            </p>
+            <span class="asof" id="asof">Prices as of —</span>
+        </section>
+
+        <div class="tabs" role="tablist" aria-label="Calculators">
+            <button class="tab" role="tab" id="tab-api" aria-controls="panel-api" aria-selected="true">API token costs</button>
+            <button class="tab" role="tab" id="tab-self" aria-controls="panel-self" aria-selected="false" tabindex="-1">Self-host vs API</button>
+            <button class="tab" role="tab" id="tab-gpu" aria-controls="panel-gpu" aria-selected="false" tabindex="-1">GPU sizing &amp; training</button>
+            <button class="tab" role="tab" id="tab-method" aria-controls="panel-method" aria-selected="false" tabindex="-1">Method</button>
         </div>
-    </section>
 
-    <!-- Main Calculator Section -->
-    <section id="calculator" class="calculator-section">
-        <div class="container">
-            <div class="calculator-layout">
-                <!-- Input Panel -->
-                <div class="input-panel">
-                    <h3><i class="fas fa-sliders-h"></i> Model Configuration</h3>
-                    
-                    <div class="input-group">
-                        <label for="modelType">
-                            <i class="fas fa-brain"></i>
-                            Model Type
-                        </label>
-                        <select id="modelType">
-                            <option value="text">Text/Language Model (LLM)</option>
-                            <option value="image">Image Generation Model</option>
-                            <option value="video">Video Generation Model</option>
-                        </select>
+        <!-- API token costs -->
+        <section class="panel" id="panel-api" role="tabpanel" aria-labelledby="tab-api">
+            <div class="layout">
+                <form class="inputs" id="workload" onsubmit="return false">
+                    <h2>Your workload</h2>
+                    <p class="hint">Start from a preset, then make it yours.</p>
+                    <div class="chips" id="presets" aria-label="Workload presets"></div>
+                    <div class="field">
+                        <label for="requestsPerDay">Requests per day</label>
+                        <input type="number" id="requestsPerDay" min="1" step="100" value="20000">
                     </div>
-
-                    <div class="input-group">
-                        <label for="parameters">
-                            <i class="fas fa-cog"></i>
-                            Parameters (Billions)
-                        </label>
-                        <input type="number" id="parameters" value="7" min="0.1" max="1000" step="0.1">
-                        <div class="input-help">
-                            <span class="preset-btn" data-value="1.5">1.5B</span>
-                            <span class="preset-btn" data-value="7">7B</span>
-                            <span class="preset-btn" data-value="13">13B</span>
-                            <span class="preset-btn" data-value="30">30B</span>
-                            <span class="preset-btn" data-value="70">70B</span>
+                    <div class="row2">
+                        <div class="field">
+                            <label for="inputTokens">Input tokens</label>
+                            <input type="number" id="inputTokens" min="1" step="100" value="1500">
+                        </div>
+                        <div class="field">
+                            <label for="outputTokens">Output tokens</label>
+                            <input type="number" id="outputTokens" min="1" step="50" value="300">
                         </div>
                     </div>
-
-                    <div class="input-group">
-                        <label for="cloudProvider">
-                            <i class="fas fa-cloud"></i>
-                            Cloud Provider
-                        </label>
-                        <select id="cloudProvider">
-                            <option value="aws">Amazon Web Services (AWS)</option>
-                            <option value="gcp">Google Cloud Platform</option>
-                            <option value="azure">Microsoft Azure</option>
-                        </select>
+                    <small class="hint" style="display:block;margin:-6px 0 14px">Per request. Output includes any reasoning tokens.</small>
+                    <div class="field">
+                        <label for="cachedShare">Input served from cache <output id="cachedShareOut">60%</output></label>
+                        <input type="range" id="cachedShare" min="0" max="100" step="5" value="60">
+                        <small>A shared system prompt or document prefix that repeats across requests.</small>
                     </div>
+                    <div class="field">
+                        <label for="batchShare">Sent through batch APIs <output id="batchShareOut">0%</output></label>
+                        <input type="range" id="batchShare" min="0" max="100" step="5" value="0">
+                        <small>Work that can wait up to a day, at half price.</small>
+                    </div>
+                    <div class="field">
+                        <label for="mau">Monthly active users <small style="display:inline;margin:0">(optional)</small></label>
+                        <input type="number" id="mau" min="0" step="100" value="50000">
+                    </div>
+                    <div class="field">
+                        <span class="label">Show providers</span>
+                        <div class="checks" id="providers"></div>
+                    </div>
+                </form>
 
-                    <div class="usage-section">
-                        <h4><i class="fas fa-chart-line"></i> Usage Patterns</h4>
-                        
-                        <div class="input-group">
-                            <label for="trainingHours">
-                                <i class="fas fa-clock"></i>
-                                Training Duration (Hours)
-                            </label>
-                            <input type="number" id="trainingHours" value="100" min="1" max="10000">
+                <div aria-live="polite">
+                    <div class="toolbar">
+                        <button class="btn" type="button" data-share>Copy link to this scenario</button>
+                        <span class="toast" data-toast hidden>Link copied</span>
+                    </div>
+                    <div class="cards" id="apiCards"></div>
+                    <p class="insight" id="apiInsight"></p>
+                    <div class="table-wrap">
+                        <table>
+                            <caption class="visually-hidden" style="position:absolute;left:-9999px">Monthly cost by model, cheapest first</caption>
+                            <thead>
+                                <tr>
+                                    <th class="l" scope="col">Model</th>
+                                    <th scope="col" class="opt">Tier</th>
+                                    <th scope="col">Per request</th>
+                                                                        <th scope="col">Per month</th>
+                                    <th scope="col">Per user / mo</th>
+                                    <th class="l opt" scope="col">Split</th>
+                                </tr>
+                            </thead>
+                            <tbody id="apiRows"></tbody>
+                        </table>
+                    </div>
+                    <div class="legend">
+                        <span><i style="background:var(--seg-input)"></i>Fresh input</span>
+                        <span><i style="background:var(--seg-cached)"></i>Cached input</span>
+                        <span><i style="background:var(--seg-output)"></i>Output</span>
+                    </div>
+                    <div class="notes" id="apiNotes"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Self-host vs API -->
+        <section class="panel" id="panel-self" role="tabpanel" aria-labelledby="tab-self" hidden>
+            <div class="layout">
+                <form class="inputs" onsubmit="return false">
+                    <h2>Serve it yourself</h2>
+                    <p class="hint" id="selfWorkload"></p>
+                    <div class="field">
+                        <label for="openModel">Open-weights model</label>
+                        <select id="openModel"></select>
+                    </div>
+                    <div class="row2">
+                        <div class="field">
+                            <label for="precision">Weights</label>
+                            <select id="precision">
+                                <option value="bf16">BF16</option>
+                                <option value="fp8" selected>FP8</option>
+                                <option value="int4">4-bit</option>
+                            </select>
                         </div>
+                        <div class="field">
+                            <label for="kvPrecision">KV cache</label>
+                            <select id="kvPrecision">
+                                <option value="bf16" selected>BF16</option>
+                                <option value="fp8">FP8</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="gpu">GPU</label>
+                        <select id="gpu"></select>
+                    </div>
+                    <div class="row2">
+                        <div class="field">
+                            <label for="priceSource">Price from</label>
+                            <select id="priceSource"></select>
+                        </div>
+                        <div class="field">
+                            <label for="gpuPrice">$ per GPU-hour</label>
+                            <input type="number" id="gpuPrice" min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="concurrency">Sequences in flight per replica</label>
+                        <input type="number" id="concurrency" min="1" max="512" step="1" value="32">
+                        <small>Bigger batches raise throughput until memory runs out.</small>
+                    </div>
+                    <div class="field">
+                        <label for="utilisation">Average utilisation <output id="utilisationOut">60%</output></label>
+                        <input type="range" id="utilisation" min="10" max="100" step="5" value="60">
+                        <small>Traffic is uneven; few fleets average above 60–70%.</small>
+                    </div>
+                    <div class="field">
+                        <label for="opsOverhead">Ops &amp; engineering overhead <output id="opsOverheadOut">0%</output></label>
+                        <input type="range" id="opsOverhead" min="0" max="100" step="5" value="0">
+                    </div>
+                    <div class="field">
+                        <label for="compareModel">Compare with API model</label>
+                        <select id="compareModel"></select>
+                    </div>
+                </form>
 
-                        <div class="input-group">
-                            <label for="monthlyInferences">
-                                <i class="fas fa-rocket"></i>
-                                Monthly Inferences
-                            </label>
-                            <input type="number" id="monthlyInferences" value="1000000" min="1000" step="1000">
-                            <div class="input-help">
-                                <span class="preset-btn" data-target="monthlyInferences" data-value="100000">100K</span>
-                                <span class="preset-btn" data-target="monthlyInferences" data-value="1000000">1M</span>
-                                <span class="preset-btn" data-target="monthlyInferences" data-value="10000000">10M</span>
+                <div aria-live="polite">
+                    <div class="toolbar">
+                        <button class="btn" type="button" data-share>Copy link to this scenario</button>
+                        <span class="toast" data-toast hidden>Link copied</span>
+                    </div>
+                    <p class="insight" id="selfInsight"></p>
+                    <div class="cards" id="selfCards"></div>
+                    <div class="chart">
+                        <h3>Monthly cost as traffic grows</h3>
+                        <div id="selfChart"></div>
+                        <div class="legend">
+                            <span><i style="background:var(--line-api)"></i><span id="legendApi">API</span></span>
+                            <span><i style="background:var(--line-self)"></i>Self-hosted (whole replicas, one always on)</span>
+                            <span><i style="background:var(--good)"></i>Break-even</span>
+                        </div>
+                    </div>
+                    <div class="notes" id="selfNotes"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GPU sizing & training -->
+        <section class="panel" id="panel-gpu" role="tabpanel" aria-labelledby="tab-gpu" hidden>
+            <div class="split">
+                <div class="box">
+                    <h2>Memory to serve a model</h2>
+                    <p>Weights plus the KV cache for every sequence in flight.</p>
+                    <form onsubmit="return false">
+                        <div class="field">
+                            <label for="memModel">Model</label>
+                            <select id="memModel"></select>
+                        </div>
+                        <div class="row2">
+                            <div class="field">
+                                <label for="memPrecision">Weights</label>
+                                <select id="memPrecision">
+                                    <option value="bf16">BF16</option>
+                                    <option value="fp8" selected>FP8</option>
+                                    <option value="int4">4-bit</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="memKv">KV cache</label>
+                                <select id="memKv">
+                                    <option value="bf16" selected>BF16</option>
+                                    <option value="fp8">FP8</option>
+                                </select>
                             </div>
                         </div>
-
-                        <div class="input-group">
-                            <label for="concurrentUsers">
-                                <i class="fas fa-users"></i>
-                                Peak Concurrent Users
-                            </label>
-                            <input type="number" id="concurrentUsers" value="100" min="1" max="100000">
+                        <div class="row2">
+                            <div class="field">
+                                <label for="memContext">Context tokens</label>
+                                <input type="number" id="memContext" min="256" step="1024" value="8192">
+                            </div>
+                            <div class="field">
+                                <label for="memSeqs">Sequences</label>
+                                <input type="number" id="memSeqs" min="1" step="1" value="32">
+                            </div>
+                        </div>
+                    </form>
+                    <div aria-live="polite">
+                        <div class="cards" id="memCards"></div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th class="l" scope="col">GPU</th><th scope="col">Memory</th><th scope="col">GPUs needed</th><th scope="col">$/hour</th></tr></thead>
+                                <tbody id="memRows"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- Results Panel -->
-                <div class="results-panel">
-                    <h3><i class="fas fa-calculator"></i> Cost Estimates</h3>
-                    
-                    <!-- Training Costs -->
-                    <div class="cost-section">
-                        <h4><i class="fas fa-graduation-cap"></i> Training Phase</h4>
-                        <div class="cost-cards">
-                            <div class="cost-card">
-                                <div class="cost-icon"><i class="fas fa-dollar-sign"></i></div>
-                                <div class="cost-content">
-                                    <div class="cost-value" id="trainingCost">$12,500</div>
-                                    <div class="cost-label">Total Training Cost</div>
-                                </div>
+                <div class="box">
+                    <h2>Compute to train a model</h2>
+                    <p>The standard estimate: 6 × parameters × training tokens.</p>
+                    <form onsubmit="return false">
+                        <div class="row2">
+                            <div class="field">
+                                <label for="trainParams">Parameters (B)</label>
+                                <input type="number" id="trainParams" min="0.1" step="0.1" value="8">
                             </div>
-                            <div class="cost-card">
-                                <div class="cost-icon"><i class="fas fa-microchip"></i></div>
-                                <div class="cost-content">
-                                    <div class="cost-value" id="trainingGPU">4x A100</div>
-                                    <div class="cost-label">Recommended GPUs</div>
-                                </div>
+                            <div class="field">
+                                <label for="trainActive">Active per token (B)</label>
+                                <input type="number" id="trainActive" min="0.1" step="0.1" value="8">
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Inference Costs -->
-                    <div class="cost-section">
-                        <h4><i class="fas fa-rocket"></i> Inference Phase</h4>
-                        <div class="cost-cards">
-                            <div class="cost-card">
-                                <div class="cost-icon"><i class="fas fa-calendar-alt"></i></div>
-                                <div class="cost-content">
-                                    <div class="cost-value" id="monthlyInferenceCost">$3,200</div>
-                                    <div class="cost-label">Monthly Cost</div>
-                                </div>
+                        <div class="field">
+                            <label for="trainTokens">Training tokens (billions)</label>
+                            <input type="number" id="trainTokens" min="1" step="10" value="160">
+                            <small><button class="chip" type="button" id="chinchilla">Use 20 tokens per parameter</button></small>
+                        </div>
+                        <div class="row2">
+                            <div class="field">
+                                <label for="trainGpu">GPU</label>
+                                <select id="trainGpu"></select>
                             </div>
-                            <div class="cost-card">
-                                <div class="cost-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                <div class="cost-content">
-                                    <div class="cost-value" id="costPerInference">$0.0032</div>
-                                    <div class="cost-label">Cost per Inference</div>
-                                </div>
+                            <div class="field">
+                                <label for="trainGpus">Cluster size</label>
+                                <input type="number" id="trainGpus" min="1" step="8" value="256">
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Hardware Recommendations -->
-                    <div class="hardware-section">
-                        <h4><i class="fas fa-server"></i> Hardware Recommendations</h4>
-                        <div class="hardware-grid" id="hardwareGrid">
-                            <!-- Hardware recommendations will be populated by JavaScript -->
+                        <div class="field">
+                            <label for="trainMfu">Model FLOPs utilisation <output id="trainMfuOut">35%</output></label>
+                            <input type="range" id="trainMfu" min="10" max="60" step="1" value="35">
+                            <small>Meta's Llama 3.1 405B run works out at about 35% on H100s.</small>
                         </div>
-                    </div>
-
-                    <!-- ROI Analysis -->
-                    <div class="roi-section">
-                        <h4><i class="fas fa-chart-pie"></i> Cost Breakdown</h4>
-                        <canvas id="costChart" width="400" height="200"></canvas>
+                    </form>
+                    <div aria-live="polite">
+                        <div class="cards" id="trainCards"></div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Comparison Section -->
-    <section id="comparison" class="comparison-section">
-        <div class="container">
-            <h2><i class="fas fa-balance-scale"></i> Model Comparison</h2>
-            <div class="comparison-table-wrapper">
-                <table class="comparison-table" id="comparisonTable">
-                    <thead>
-                        <tr>
-                            <th>Configuration</th>
-                            <th>Training Cost</th>
-                            <th>Monthly Inference</th>
-                            <th>Recommended GPU</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Comparison rows will be populated by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-            <button class="btn-primary" onclick="addCurrentToComparison()">
-                <i class="fas fa-plus"></i> Add Current Configuration
-            </button>
-        </div>
-    </section>
+        <!-- Method -->
+        <section class="panel method" id="panel-method" role="tabpanel" aria-labelledby="tab-method" hidden>
+            <h2>API token costs</h2>
+            <p>For each model, a request costs:</p>
+            <span class="formula">fresh input × input price + cached input × cached price + output × output price</span>
+            <p>
+                Batched requests use each provider's batch prices (half the standard rate). Cache writes are ignored:
+                with a reused prefix they are a small one-off. Prompts above a model's long-context threshold switch to
+                its long-context prices where the provider publishes them. A month is 30 days.
+            </p>
 
-    <!-- About Section -->
-    <section id="about" class="about-section">
-        <div class="container">
-            <div class="about-content">
-                <div class="about-text">
-                    <h2>About This Calculator</h2>
-                    <p>Built by <strong>Akhil S</strong>, an AI Product Manager with experience managing ₹150 Cr+ AI portfolios at scale. This calculator draws from real-world experience in GPU economics and cost optimization across multiple AI product lines.</p>
-                    
-                    <h3>Methodology</h3>
-                    <ul>
-                        <li><strong>Training Costs:</strong> Based on model parameters, GPU requirements, and cloud provider pricing</li>
-                        <li><strong>Inference Costs:</strong> Calculated using throughput estimates and concurrent user patterns</li>
-                        <li><strong>Hardware Selection:</strong> Optimized for memory requirements and compute efficiency</li>
-                        <li><strong>Pricing Data:</strong> Updated regularly from AWS, GCP, and Azure public pricing</li>
-                    </ul>
+            <h2>Self-hosting an open-weights model</h2>
+            <p>
+                Generating tokens is usually limited by memory bandwidth, not compute: every step reads the weights and
+                every sequence's KV cache. So one decode step takes the longer of
+            </p>
+            <span class="formula">(weights read + sequences × KV cache per sequence) ÷ (bandwidth × efficiency)</span>
+            <span class="formula">2 × active parameters × sequences ÷ (peak FLOPS × utilisation)</span>
+            <ul>
+                <li>KV cache per token = 2 × layers × KV heads × head size × bytes, from each model's published config.</li>
+                <li>Mixture-of-experts models read only the experts a batch touches: a share of 1 − (1 − active/total)<sup>batch</sup> of the weights.</li>
+                <li>Prompt processing (prefill) is compute-bound: 2 × active parameters FLOPs per prompt token, at 50% utilisation.</li>
+                <li>Bandwidth efficiency 70%, decode compute utilisation 40%, and 85% scaling per extra GPU in a replica.</li>
+                <li>A replica is the fewest of 1, 2, 4 or 8 GPUs that hold the weights plus 8 sequences of cache, using 90% of memory.</li>
+                <li>Cost per request = replica cost per second × seconds of replica time per request ÷ average utilisation.</li>
+                <li>Self-hosting is billed in whole replicas with at least one always on, so it only wins above a break-even volume.</li>
+            </ul>
+            <p>
+                These are first-order estimates. Real serving stacks (vLLM, TensorRT-LLM, SGLang) add continuous batching,
+                speculative decoding and prefix caching, so treat the result as a range and measure your own workload
+                before committing.
+            </p>
 
-                    <div class="about-links">
-                        <a href="https://akhilrajs.com" class="btn-secondary" target="_blank">
-                            <i class="fas fa-user"></i> View Portfolio
-                        </a>
-                        <a href="https://github.com/akhil743" class="btn-secondary" target="_blank">
-                            <i class="fab fa-github"></i> GitHub Profile
-                        </a>
-                    </div>
-                </div>
-                <div class="about-image">
-                    <div class="feature-grid">
-                        <div class="feature-item">
-                            <i class="fas fa-bolt"></i>
-                            <span>Real-time Calculations</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Cost Visualization</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="fas fa-mobile-alt"></i>
-                            <span>Mobile Responsive</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="fas fa-database"></i>
-                            <span>Updated Pricing</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+            <h2>Memory and training</h2>
+            <p>Serving memory = weights (parameters × bytes per parameter) + KV cache (per token × context × sequences).</p>
+            <p>Training compute uses the standard rule of thumb from scaling-law research:</p>
+            <span class="formula">FLOPs = 6 × active parameters × training tokens</span>
+            <span class="formula">GPU-hours = FLOPs ÷ (peak BF16 FLOPS × MFU) ÷ 3600</span>
+            <p>
+                <strong>Calibration:</strong> Llama 3.1 405B trained on 15.6T tokens. At 35% MFU on H100s this gives
+                30.4M GPU-hours; Meta reported 30.84M. Smaller models use GPUs less efficiently: Meta's figures for the
+                8B and 70B imply roughly 14% and 25%. Mixed-precision Adam needs about 16 bytes per parameter before
+                activations, which sets the minimum number of GPUs even with full sharding.
+            </p>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-left">
-                    <p>&copy; 2026 Akhil S. Built with expertise from managing AI portfolios at scale.</p>
-                </div>
-                <div class="footer-right">
-                    <a href="https://akhilrajs.com" target="_blank">Portfolio</a>
-                    <a href="https://linkedin.com/in/akhil-raj-b3531453" target="_blank">LinkedIn</a>
-                    <a href="https://github.com/akhil743" target="_blank">GitHub</a>
-                </div>
-            </div>
+            <h2>Sources</h2>
+            <ul id="sourceList"></ul>
+            <p>
+                GPU specs are dense (no sparsity) BF16 and FP8 tensor throughput and memory bandwidth from NVIDIA's
+                datasheets. Prices change often; every number lives in <code>js/data.js</code> with its source, so
+                updating them is a one-file change.
+            </p>
+        </section>
+    </main>
+
+    <footer>
+        <div class="wrap">
+            <span>Built by <a href="https://akhilrajs.com" target="_blank" rel="noopener">Akhil S</a>. Estimates, not quotes.</span>
+            <span><a href="https://github.com/Akhil743/gpu-cost-calculator" target="_blank" rel="noopener">Source on GitHub</a></span>
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="./js/calculator.js"></script>
-    <script src="./js/app.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/ui.js"></script>
 </body>
+
 </html>

@@ -1,203 +1,74 @@
-# GPU Cost Economics Calculator
+# AI Cost Calculator
 
-An interactive web application for estimating GPU costs and hardware requirements for AI model training and inference. Built by Akhil S, drawing from real-world experience managing ₹150 Cr+ AI portfolios.
+**Live:** https://akhil743.github.io/gpu-cost-calculator/
 
-## 🚀 Features
+![AI Cost Calculator](assets/og.png)
 
-- **Multi-Model Support**: Calculate costs for text (LLM), image generation, and video generation models
-- **Real-Time Estimates**: Instant cost calculations based on model parameters and usage patterns
-- **Cloud Provider Comparison**: Support for AWS, GCP, and Azure pricing
-- **Hardware Recommendations**: GPU selection optimized for memory requirements and performance
-- **Training vs Inference**: Separate cost models for one-time training and ongoing inference
-- **Interactive Dashboard**: Modern, responsive UI with dark/light mode support
-- **Cost Visualization**: Charts and breakdowns for better understanding
-- **Configuration Comparison**: Compare multiple model configurations side-by-side
-- **Export & Share**: Export analysis as JSON or share via URL
+Three questions come up whenever a team ships an AI feature: what will the API bill be, when does running an
+open-weights model on our own GPUs become cheaper, and how much hardware does a model need? This calculator answers
+all three from one engine and one dated price list, with every assumption on the page.
 
-## 🎯 Use Cases
+## What it does
 
-- **AI Project Planning**: Estimate budgets for ML initiatives
-- **Hardware Procurement**: Choose optimal GPU configurations
-- **Cost Optimization**: Compare different model sizes and cloud providers
-- **ROI Analysis**: Understand training vs inference cost trade-offs
-- **Resource Planning**: Plan for peak load and scaling requirements
+**API token costs.** 16 current models from OpenAI, Anthropic, Google and open-weights hosts, priced for your
+workload: requests per day, input and output tokens, the share of input served from cache, and the share sent through
+batch APIs. It shows monthly cost, cost per request and per user, and where the money goes (fresh input, cached input,
+output). Workload presets cover a support chatbot, RAG, a coding agent, nightly batch jobs and
+[YouTube Chat AI](https://akhilrajs.com/youtube-chat/).
 
-## 📊 Supported Models
+**Self-host vs API.** Pick an open-weights model, precision, GPU and price. It works out how many GPUs a replica
+needs, decode throughput, cost per million output tokens and per request, and the request volume where self-hosting
+starts to beat the API, with a cost-vs-traffic chart.
 
-### Text Models (LLMs)
-- Parameters: 1.5B to 1000B+
-- Examples: GPT, LLaMA, PaLM, Gemini
-- Optimized for token-based inference
+**GPU sizing and training.** Memory to serve a model (weights plus KV cache) on each GPU, and training compute, GPU-hours,
+cost and wall-clock time from the 6·N·D rule.
 
-### Image Generation Models
-- Parameters: 1B to 100B+
-- Examples: Stable Diffusion, DALL-E, Imagen
-- Optimized for image synthesis workloads
+## How the estimates work
 
-### Video Generation Models
-- Parameters: 1B to 100B+
-- Examples: Sora, Gen-2, Pika Labs
-- Optimized for video generation tasks
+- **Token costs:** fresh input × input price + cached input × cached price + output × output price, with batch prices
+  for the batched share and long-context prices where the provider publishes them.
+- **Serving throughput:** decoding is memory-bandwidth bound. A step reads the weights the batch touches plus every
+  sequence's KV cache; the slower of that and the compute time sets tokens per second. KV cache per token comes from each
+  model's published config (layers × KV heads × head size). Mixture-of-experts models read only the experts a batch
+  touches.
+- **Self-host cost:** whole replicas billed by the hour with one always on, divided by average utilisation, plus an
+  optional ops overhead. Break-even is the volume where the API bill reaches one replica's monthly cost.
+- **Training:** FLOPs = 6 × active parameters × tokens; GPU-hours = FLOPs ÷ (peak BF16 FLOPS × MFU).
 
-## 🛠️ Technology Stack
+**Calibration:** Llama 3.1 405B trained on 15.6T tokens. At 35% MFU on H100s the calculator gives 30.4M GPU-hours;
+Meta reported 30.84M. This is checked by a unit test.
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Visualization**: Chart.js for cost breakdowns
-- **Styling**: Modern CSS with CSS Grid and Flexbox
-- **Responsive**: Mobile-first design approach
-- **Performance**: Optimized for real-time calculations
+These are first-order estimates. Production serving stacks (vLLM, TensorRT-LLM, SGLang) add continuous batching,
+speculative decoding and prefix caching, so measure your own workload before committing to hardware.
 
-## 💡 Methodology
+## Data
 
-### Cost Calculation Approach
+All prices and specs live in [`js/data.js`](js/data.js), each with its source:
 
-1. **Memory Requirements**: Based on model parameters and precision (FP16/FP32)
-2. **Compute Estimation**: FLOPs calculations for training and inference
-3. **Hardware Selection**: Optimal GPU choice based on memory and performance
-4. **Cloud Pricing**: Real-time pricing from major cloud providers
-5. **Efficiency Factors**: Real-world utilization and overhead considerations
+| What | Source | As of |
+| --- | --- | --- |
+| OpenAI, Anthropic, Google token prices | Each provider's official API pricing page | 29 Oct 2026 |
+| Open-weights hosted prices | Together AI pricing | 29 Oct 2026 |
+| GPU on-demand prices | Lambda and RunPod pricing pages | 29 Oct 2026 |
+| GPU specs (dense BF16/FP8 TFLOPS, memory, bandwidth) | NVIDIA datasheets | — |
 
-### GPU Database
+Gemini 4 Argon and Gemini 3.8 Flash have announced price rises (1 Dec 2026 and 1 Jan 2027); the page flags them.
+Updating prices is a one-file change: edit the numbers, update `asOf`, run the tests.
 
-The calculator includes pricing and specifications for:
-- NVIDIA A100 (40GB/80GB)
-- NVIDIA H100 (80GB)
-- NVIDIA V100 (16GB/32GB)
-- NVIDIA T4 (16GB)
+## Run it
 
-Across AWS, GCP, and Azure platforms.
+It's a static site with no build step and no dependencies.
 
-## 🚀 Getting Started
-
-### Online Version
-Visit: [https://akhil743.github.io/gpu-cost-calculator](https://akhil743.github.io/gpu-cost-calculator)
-
-### Local Development
-
-1. Clone the repository:
 ```bash
-git clone https://github.com/akhil743/gpu-cost-calculator.git
-cd gpu-cost-calculator
+python3 -m http.server 8000   # then open http://localhost:8000
+npm test                      # unit tests for the cost engine (Node 20+)
 ```
 
-2. Open in your browser:
-```bash
-# Serve locally (recommended)
-python -m http.server 8000
-# Or simply open index.html in your browser
-```
+## Code
 
-3. Start calculating GPU costs!
+- `js/data.js`: prices, GPU specs, open-weights model configs and workload presets.
+- `js/engine.js`: the maths as pure functions, shared by the page and the tests.
+- `js/ui.js`: inputs, results, charts and shareable links (the scenario is saved in the URL).
+- `tests/engine.test.js`: cost maths, memory sizing, break-even logic and the Llama 3.1 calibration.
 
-## 📈 Usage Examples
-
-### Example 1: 7B Language Model
-- **Model Type**: Text (LLM)
-- **Parameters**: 7 billion
-- **Training**: ~100 hours
-- **Inference**: 1M requests/month
-
-**Results**: 
-- Training Cost: ~$12,500 (4x A100 80GB)
-- Monthly Inference: ~$3,200
-- Cost per inference: ~$0.0032
-
-### Example 2: Image Generation Model
-- **Model Type**: Image
-- **Parameters**: 2.5 billion
-- **Training**: 200 hours
-- **Inference**: 500K generations/month
-
-**Results**:
-- Training Cost: ~$8,000 (2x A100 80GB)
-- Monthly Inference: ~$2,400
-- Cost per generation: ~$0.0048
-
-## 🔧 Configuration Options
-
-### Model Configuration
-- **Model Type**: Text, Image, or Video
-- **Parameters**: Model size in billions
-- **Cloud Provider**: AWS, GCP, or Azure
-
-### Usage Patterns
-- **Training Duration**: Hours of training required
-- **Monthly Inferences**: Expected inference volume
-- **Concurrent Users**: Peak concurrent load
-
-### Advanced Settings
-- **Precision**: FP16/FP32 (affects memory requirements)
-- **Batch Size**: Training and inference batch sizes
-- **Utilization**: Expected GPU utilization rates
-
-## 📊 Cost Breakdown
-
-The calculator provides detailed breakdowns including:
-- **Training Costs**: One-time training expenses
-- **Inference Costs**: Ongoing operational costs
-- **Infrastructure**: Cloud provider overhead
-- **Optimization**: Potential savings opportunities
-
-## 🎨 Customization
-
-The calculator is built with modern CSS custom properties, making it easy to customize:
-
-```css
-:root {
-    --primary-color: #2563eb;
-    --accent-color: #8b5cf6;
-    --success-color: #10b981;
-    /* ... more variables */
-}
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit issues or pull requests.
-
-### Development Setup
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-### Areas for Contribution
-- Additional GPU models and pricing
-- New cloud provider support
-- Enhanced visualization options
-- Mobile app version
-- API integration
-
-## 📄 License
-
-MIT License - feel free to use this calculator for your projects.
-
-## 👤 About the Author
-
-Built by **Akhil S**, an AI Product Manager with experience managing large-scale AI portfolios at Reliance Industries. This calculator draws from real-world experience in GPU economics and cost optimization.
-
-- **Portfolio**: [akhilrajs.com](https://akhilrajs.com)
-- **LinkedIn**: [Akhil Raj](https://linkedin.com/in/akhil-raj-b3531453)
-- **GitHub**: [akhil743](https://github.com/akhil743)
-
-## 🙏 Acknowledgments
-
-- Cloud provider pricing data from AWS, GCP, and Azure
-- GPU specifications from NVIDIA documentation
-- Performance benchmarks from MLPerf and academic papers
-- UI inspiration from modern fintech and dev tools
-
-## 📈 Roadmap
-
-- [ ] Real-time pricing API integration
-- [ ] Custom model architecture support
-- [ ] Multi-cloud deployment cost estimation
-- [ ] Energy consumption calculations
-- [ ] Carbon footprint analysis
-- [ ] Team collaboration features
-- [ ] Historical cost tracking
-
----
-
-**Disclaimer**: Cost estimates are based on public pricing and benchmarks. Actual costs may vary based on specific configurations, negotiations, and usage patterns. Always validate estimates with your cloud provider.
+Built by [Akhil S](https://akhilrajs.com). Estimates, not quotes. MIT licence.
